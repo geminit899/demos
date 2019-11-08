@@ -14,11 +14,18 @@
     <modules>
         <module>spark</module>
         <module>flink</module>
+        <module>elasticsearch</module>
+        <module>hbase</module>
+        <module>jdbc</module>
+        <module>hadoop</module>
+        <module>py4j</module>
     </modules>
 
     <properties>
         <flink.version>1.7.1</flink.version>
         <spark.version>2.1.0</spark.version>
+        <hbase.version>2.0.0</hbase.version>
+        <hadoop.version>3.1.1</hadoop.version>
     </properties>
 
     <dependencies>
@@ -64,6 +71,53 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-wikiedits_2.11</artifactId>
             <version>${flink.version}</version>
+        </dependency>
+
+        <!-- hbase-->
+        <dependency>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase-common</artifactId>
+            <version>${hbase.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase-client</artifactId>
+            <version>${hbase.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase-protocol</artifactId>
+            <version>${hbase.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase-server</artifactId>
+            <version>${hbase.version}</version>
+        </dependency>
+
+        <!-- py4j -->
+        <dependency>
+            <groupId>net.sf.py4j</groupId>
+            <artifactId>py4j</artifactId>
+            <version>0.10.8.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.json-lib</groupId>
+            <artifactId>json-lib</artifactId>
+            <version>2.4</version>
+            <classifier>jdk15</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.21</version>
         </dependency>
     </dependencies>
 
