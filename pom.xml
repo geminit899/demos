@@ -19,6 +19,7 @@
         <module>jdbc</module>
         <module>hadoop</module>
         <module>py4j</module>
+        <module>java4p</module>
     </modules>
 
     <properties>
