@@ -1,12 +1,20 @@
 package com.geminit;
 
 import com.google.gson.Gson;
+import org.apache.spark.SparkConf;
+import org.apache.spark.SparkContext;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.rdd.RDD;
 import py4j.ClientServer;
+import scala.collection.JavaConverters;
+import scala.collection.Seq;
+import scala.reflect.ClassTag$;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +49,7 @@ public class JavaMain {
 //                "\tpython_parameters = PythonParameters(),\n" +
 //                "\tpython_server_entry_point = main\n" +
 //                ")";
-        String path = "/Users/geminit/IdeaProjects/Demos/py4j/src/main/python/PythonMain.py";
+        String path = "/home/ideaProjects/Demos/py4j/src/main/python/PythonMain.py";
 //        File file = new File(path);
 //        file.delete();
 //        try {
@@ -61,7 +69,7 @@ public class JavaMain {
             if (process != null && process.isAlive()) {
                 process.destroy();
             }
-            process = Runtime.getRuntime().exec("python3 " + path);
+            process = Runtime.getRuntime().exec("python " + path);
             Thread.sleep(500);
         } catch (IOException e) {
             e.printStackTrace();
@@ -76,18 +84,41 @@ public class JavaMain {
 
             ClientServer server = new ClientServer(null);
             MainInterface main = (MainInterface) server.getPythonServerEntryPoint(new Class[] {MainInterface.class});
+
+            main.initSparkContext();
             try {
-                List<Map> list = new ArrayList<>();
-                for (int i = 0; i < 10; i++) {
-                    Map<String, Object> dic = new HashMap<>();
-                    dic.put("name", "tyx" + i);
-                    dic.put("age", 20 + i);
-                    dic.put("isMan", true);
-                    list.add(dic);
+                SparkConf conf = new SparkConf();
+                conf.setAppName("zpsb");
+                conf.setMaster("local");
+                SparkContext context = new SparkContext(conf);
+
+                List<String> strList = new ArrayList<>();
+
+                for (int i = 1; i < 5; i++) {
+                    List<Integer> list = new ArrayList<>();
+                    list.add(i);
+                    Seq<Integer> seq = JavaConverters.asScalaIteratorConverter(list.iterator()).asScala().toSeq();
+                    RDD<Integer> rdd = context.parallelize(seq, 1, ClassTag$.MODULE$.apply(Integer.class));
+
+                    String rddPath = "/home/rdds/" + i;
+                    rdd.saveAsTextFile(rddPath);
+
+                    Emitter emitter = new Emitter();
+                    main.toPython(rddPath, emitter);
+
+                    String outputPath = emitter.get();
+                    RDD<String> result = context.textFile(outputPath, 1);
+                    Object object = result.collect();
+                    String[] arr = (String[]) object;
+
+                    for (String str : arr) {
+                        strList.add(str);
+                    }
                 }
-                Emitter emitter = new Emitter();
-                main.comput(list, emitter);
-                System.out.println(emitter.get());
+
+                for (String str : strList) {
+                    System.out.println(str);
+                }
             } catch (Exception e) {
                 e.printStackTrace();
             }

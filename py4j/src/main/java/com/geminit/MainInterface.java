@@ -1,10 +1,12 @@
 package com.geminit;
 
+import org.apache.spark.rdd.RDD;
+
 import java.util.List;
 import java.util.Map;
 
 public interface MainInterface {
-    public void transform(Map dic, Emitter emitter);
+    public void initSparkContext();
 
-    public void comput(List<Map> maps, Emitter emitter);
+    public void toPython(String rddPath, Emitter emitter);
 }
