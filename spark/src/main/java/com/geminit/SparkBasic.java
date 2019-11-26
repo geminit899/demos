@@ -32,33 +32,25 @@ public class SparkBasic {
     }
 
     public static void main(String[] args) {
-        List<Object> list = new ArrayList<>();
-        Obj obj = new Obj("sss");
-        list.add(obj);
-        list.add(obj);
-        list.add(new Obj("imsi"));
-        list.add(new Obj("imsi"));
-        JavaRDD<Object> javaRDD = listToRdd(list);
-        JavaPairRDD<Object, String> pairRDD = javaRDD.mapToPair(new PairFunction<Object, Object, String>() {
+        List<String> list = new ArrayList<>();
+        list.add("car");
+        list.add("imsi");
+        list.add("face");
+        Seq<String> tmpSeq = JavaConverters.asScalaIteratorConverter(list.iterator()).asScala().toSeq();
+        //并行集合，是通过对于驱动程序中的集合调用JavaSparkContext.parallelize来构建的RDD
+        JavaRDD<String> javaRDD = SC.parallelize(tmpSeq, 2, ClassTag$.MODULE$.apply(String.class)).toJavaRDD();
+        JavaPairRDD<String, String> pairRDD = javaRDD.mapToPair(new PairFunction<String, String, String>() {
             @Override
-            public Tuple2<Object, String> call(Object object) throws Exception {
-                return new Tuple2<>(object, ((Obj) object).getName());
+            public Tuple2<String, String> call(String str) throws Exception {
+                return new Tuple2<>("123", str);
             }
         });
-        JavaPairRDD<Object, String> flatMapRDD = pairRDD.groupByKey().mapToPair(
-                new PairFunction<Tuple2<Object, Iterable<String>>, Object, String>() {
-            @Override
-            public Tuple2<Object, String> call(Tuple2<Object, Iterable<String>> tuple2) throws Exception {
-                String value = "";
-                Iterator<String> interator = tuple2._2.iterator();
-                while (interator.hasNext()) {
-                    String s = interator.next();
-                    value += s + ";";
-                }
-                return new Tuple2<>(tuple2._1, value);
-            }
-        });
-        System.out.println(flatMapRDD.collect().toString());
+
+        JavaRDD<String> objRDD = pairRDD.keys();
+        JavaRDD<String> strRDD = pairRDD.values();
+
+        System.out.println(objRDD.collect().toString());
+        System.out.println(strRDD.collect().toString());
     }
 
     public static JavaRDD listToRdd(List<Object> list) {

@@ -1,23 +1,16 @@
 package com.geminit;
 
-import com.google.gson.Gson;
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.rdd.RDD;
 import py4j.ClientServer;
 import scala.collection.JavaConverters;
 import scala.collection.Seq;
 import scala.reflect.ClassTag$;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class JavaMain {
     private static Process process;

@@ -1,6 +1,5 @@
 package com.geminit.cluster;
 
-import org.apache.flink.client.cli.CliFrontend;
 import org.apache.spark.deploy.SparkSubmit;
 
 public class ClusterTest {
