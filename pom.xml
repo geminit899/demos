@@ -20,6 +20,7 @@
         <module>hadoop</module>
         <module>py4j</module>
         <module>sfj4p</module>
+        <module>htdata</module>
     </modules>
 
     <properties>
