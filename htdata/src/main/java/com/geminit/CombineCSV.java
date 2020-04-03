@@ -40,7 +40,7 @@ public class CombineCSV {
             File des = new File(CombineCSV.desCsv);
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(des, true),"gb2312"));
 
-            writer.write("\"村名称\",\"用户标识\",\"台区标识\",\"台区编号\",\"台区名称\"," +
+            writer.write("\"县区\",\"乡镇\",\"村名称\",\"用户标识\",\"台区标识\",\"台区编号\",\"台区名称\"," +
                     "\"1月用电量\",\"2月用电量\",\"3月用电量\",\"4月用电量\",\"5月用电量\",\"6月用电量\"," +
                     "\"7月用电量\",\"8月用电量\",\"9月用电量\",\"10月用电量\",\"11月用电量\",\"12月用电量\"\n");
 
