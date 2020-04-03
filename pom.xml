@@ -21,6 +21,7 @@
         <module>py4j</module>
         <module>sfj4p</module>
         <module>htdata</module>
+        <module>twill</module>
     </modules>
 
     <properties>
@@ -28,6 +29,7 @@
         <spark.version>2.1.0</spark.version>
         <hbase.version>2.0.0</hbase.version>
         <hadoop.version>3.1.1</hadoop.version>
+        <twill.version>0.11.0</twill.version>
     </properties>
 
     <dependencies>

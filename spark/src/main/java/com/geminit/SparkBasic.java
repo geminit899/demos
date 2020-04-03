@@ -24,14 +24,15 @@ public class SparkBasic {
     public static JavaStreamingContext JSC;
 
     static {
-        SparkConf conf = new SparkConf();
-        conf.setAppName("zpsb");
-        conf.setMaster("local");
+//        SparkConf conf = new SparkConf();
+//        conf.setAppName("zpsb");
+//        conf.setMaster("spark://192.168.0.114:7077");
 //        conf.set("", "");
-        SC = new SparkContext(conf);
+//        SC = new SparkContext();
     }
 
     public static void main(String[] args) {
+        SC = new SparkContext();
         List<String> list = new ArrayList<>();
         list.add("car");
         list.add("imsi");

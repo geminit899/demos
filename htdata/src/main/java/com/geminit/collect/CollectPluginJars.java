@@ -48,7 +48,8 @@ public class CollectPluginJars {
                     //遍历target目录下所有文件
                     for (File targetFiles : files.listFiles()) {
                         //获取pluginName相符的jar文件和json文件
-                        if (targetFiles.getName().contains(file.getName()) &&
+                        if (targetFiles.getName().contains(file.getName()) && !targetFiles.getName().contains("sources.jar") &&
+                                !targetFiles.getName().contains("javadoc.jar") &&
                                 (targetFiles.getName().endsWith(".jar") || targetFiles.getName().endsWith(".json"))) {
                             try {
                                 String filePath = targetFiles.getAbsolutePath();
