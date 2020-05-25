@@ -63,20 +63,20 @@ public class HbaseUtil {
 
     public static void main(String[] args) throws IOException {
         init();
-//        createTable("student", new String[]{"score"});
-//        insertData("student", "zhangsan", "score", "English", "60");
-//        insertData("student", "zhangsan", "score", "Math", "70");
-//        insertData("student", "zhangsan", "score", "Computer", "80");
-//        insertData("student", "lisi", "score", "English", "70");
-//        insertData("student", "lisi", "score", "Math", "70");
-//        insertData("student", "lisi", "score", "Computer", "90");
+        createTable("student", new String[]{"score"});
+        insertData("student", "zhangsan", "score", "English", "60");
+        insertData("student", "zhangsan", "score", "Math", "70");
+        insertData("student", "zhangsan", "score", "Computer", "80");
+        insertData("student", "lisi", "score", "English", "70");
+        insertData("student", "lisi", "score", "Math", "70");
+        insertData("student", "lisi", "score", "Computer", "90");
 
 //        Table table = connection.getTable(TableName.valueOf("cdap_system:configuration"));
 //        Get get = new Get(Bytes.toBytes("DEFAULT"));
 //        get.addColumn(Bytes.toBytes("f"), Bytes.toBytes("system.program.state.retry.policy.max.retries"));
 //        Result result = table.get(get);
 
-        getData("cdap_system:configuration", "DEFAULT", "f", "system.program.state.retry.policy.max.retries");
+//        getData("cdap_system:configuration", "DEFAULT", "f", "system.program.state.retry.policy.max.retries");
 
         close();
     }
