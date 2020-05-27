@@ -12,13 +12,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CombineCSV {
-    private static String csvPath = "/home/geminit/work/LongShanShi";
-    private static String desCsv = "/home/geminit/work/LongShanShi.csv";
+    private static String csvPath = "/Users/geminit/Desktop/电力项目/NanShanShiTotal";
+    private static String desCsv = "/Users/geminit/Desktop/电力项目/LongShanShi.csv";
 
     public static void main(String[] args) {
         File csvPath = new File(CombineCSV.csvPath);
+        System.out.println("开始查找csv文件。");
         List<File> csvs = findCsvs(csvPath);
+        System.out.println("共找到" + csvs.size() + "个csv文件。\n开始组合……");
         combineCsvs(csvs);
+        System.out.println("组合完毕。");
     }
 
     public static List<File> findCsvs(File path) {
