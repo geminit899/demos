@@ -22,6 +22,7 @@
         <module>sfj4p</module>
         <module>htdata</module>
         <module>twill</module>
+        <module>ldap</module>
     </modules>
 
     <properties>
