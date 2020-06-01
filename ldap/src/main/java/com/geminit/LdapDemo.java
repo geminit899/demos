@@ -1,5 +1,7 @@
 package com.geminit;
 
+import com.sun.jndi.toolkit.dir.SearchFilter;
+
 import javax.naming.Binding;
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
@@ -22,7 +24,8 @@ import java.util.Map;
 public class LdapDemo {
     private static final String HOST = "192.168.0.114";
     private static final String PORT = "389";
-    private static final String BASE_DN = "dc=mycompany,dc=com";
+    private static final String HTSC_BASE_DN = "ou=htsc,dc=mycompany,dc=com";
+    private static final String HTSC_USER_BASE_DN = "ou=sysuser,ou=htsc,dc=mycompany,dc=com";
     private static final String ROOT = "cn=admin,dc=mycompany,dc=com";
     private static final String PWD = "admin";
 
@@ -39,17 +42,13 @@ public class LdapDemo {
     public static boolean addGoups(Map<String, String> lu, LdapContext ctx) {
         BasicAttributes attributes = new BasicAttributes();
         BasicAttribute objclassSet = new BasicAttribute("objectClass");
-        objclassSet.add("person");
-        objclassSet.add("top");
+        objclassSet.add("organizationalRole");
         attributes.put(objclassSet);
-        attributes.put("userPassword", lu.get("userPassword"));//显示
+        attributes.put("ou", lu.get("ou"));//显示
         attributes.put("cn", lu.get("cn"));//显示
-        attributes.put("sn", lu.get("cn"));//显示
-//        attributes.put("ou", lu.get("htsc"));//显示
         try {
-            String cn = "cn=" + lu.get("cn") + "," + BASE_DN;
-            System.out.println(cn);
-            ctx.createSubcontext(cn, attributes);
+            String ou = "ou=" + lu.get("ou") + "," + HTSC_BASE_DN;
+            ctx.createSubcontext(ou, attributes);
             System.out.println("添加用户group成功");
             return true;
         } catch (Exception e) {
@@ -59,36 +58,65 @@ public class LdapDemo {
         }
     }
 
-    public static boolean addUser(Map<String, String> lu, LdapContext ctx) {
-        BasicAttributes attrsbu = new BasicAttributes();
+    public static boolean addUser(String username, String password, LdapContext ctx) {
+        BasicAttributes attributes = new BasicAttributes();
         BasicAttribute objclassSet = new BasicAttribute("objectClass");
         // objclassSet.add("account");
         objclassSet.add("posixAccount");
         objclassSet.add("inetOrgPerson");
-        objclassSet.add("top");
-        objclassSet.add("shadowAccount");
-        attrsbu.put(objclassSet);
-        attrsbu.put("uid",  lu.get("uid"));//显示账号
-        attrsbu.put("sn", lu.get("sn"));//显示姓名
-        attrsbu.put("cn", lu.get("cn"));//显示账号
-        attrsbu.put("gecos", lu.get("gecos"));//显示账号
-        attrsbu.put("userPassword", lu.get("userPassword"));//显示密码
-        attrsbu.put("displayName", lu.get("displayName"));//显示描述
-        attrsbu.put("mail", lu.get("mail"));//显示邮箱
-        attrsbu.put("homeDirectory", "/home/" + lu.get("homeDirectory"));//显示home地址
-        attrsbu.put("loginShell", "/bin/bash");//显示shell方式
-        attrsbu.put("uidNumber", lu.get("uidNumber"));/*显示id */
-        attrsbu.put("gidNumber", lu.get("gidNumber"));/*显示组id */
+        attributes.put(objclassSet);
+        attributes.put("uid",  username);//显示账号
+        attributes.put("givenName", username);//显示描述
+        attributes.put("sn", username);//显示姓名
+        attributes.put("cn", username);//显示账号
+        attributes.put("uidNumber", "0");/*显示id */
+        attributes.put("gidNumber", "0");/*显示组id */
+        attributes.put("homeDirectory", "/home/" + username);//显示home地址
+        attributes.put("userPassword", password);//显示密码
 
         try {
-            String dn = "cn=" + lu.get("cn") + ",ou=People,dc=tcjf,dc=com";
-            System.out.println(dn);
-            ctx.createSubcontext(dn, attrsbu);
+            String dn = "uid=" + username + "," + HTSC_USER_BASE_DN;
+            ctx.createSubcontext(dn, attributes);
             System.out.println("添加用户成功");
             return true;
         } catch (Exception e) {
             System.out.println("添加用户失败");
             e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static boolean authorization(String username, String password, LdapContext ctx) {
+        try {
+            SearchControls ctls = new SearchControls();
+            ctls.setCountLimit(1);
+            ctls.setDerefLinkFlag(true);
+            ctls.setSearchScope(2);
+            String filter = "(&(objectClass={0})({1}={2}))";
+            Object[] filterArguments = new Object[]{"top", "uid", username};
+            NamingEnumeration<SearchResult> results = ctx.search(HTSC_USER_BASE_DN, filter, filterArguments, ctls);
+            if (!results.hasMoreElements()) {
+                System.out.println("认证失败!\n找不到该用户！");
+                return false;
+            }
+            SearchResult result = results.nextElement();
+            Attribute attribute = result.getAttributes().get("userPassword");
+            if (attribute == null) {
+                System.out.println("认证失败!\n该用户没有userPassword属性！");
+                return false;
+            }
+            byte[] value = (byte[])((byte[])attribute.get());
+            String credential = new String(value);
+            if (credential != null && credential.equals(password)) {
+                System.out.println("认证成功!");
+                return true;
+            } else {
+                System.out.println("认证失败!");
+                return false;
+            }
+        } catch (NamingException ne) {
+            System.out.println("认证失败!");
+            ne.printStackTrace();
             return false;
         }
     }
@@ -180,22 +208,27 @@ public class LdapDemo {
     public static void main(String[] args) throws Exception {
         LdapContext context = getDirContext();
 
+//        // add ou=htsc
 //        Map<String, String> group = new HashMap<>();
-//        group.put("userPassword", "21232f297a57a5a743894a0e4a801fc3");
-//        group.put("cn", "root");
+//        group.put("ou", "htsc");
+//        group.put("cn", "admin");
 //        addGoups(group, context);
-//
-//
-//        List<Map<String, String>> res = readLdap(context, BASE_DN);
+
+//        // add ou=sysuser
+//        Map<String, String> group = new HashMap<>();
+//        group.put("ou", "sysuser");
+//        group.put("cn", "admin");
+//        addGoups(group, context);
+
+//        // add user: root
+//        addUser("xixi", "haha", context);
+
+        // authorization
+        authorization("xixi", "4e4d6c332b6fe62a63afe56171fd3725", context);
 
         System.out.println("1");
 
-//        BasicAttributes attrsbu = new BasicAttributes();
-//        BasicAttribute objclassSet = new BasicAttribute("objectClass");
-//        objclassSet.add("*");
-//        attrsbu.put(objclassSet);
-//        attrsbu.put("cn", "root");//显示账号
-//        attrsbu.put("userPassword", "21232f297a57a5a743894a0e4a801fc3");
+
 //
 //        String filter = "(&(objectClass={0})({1}={2}))";
 //        Object[] filterArguments = new Object[]{"*", "cn", "root"};
