@@ -121,16 +121,16 @@ public class LdapDemo {
         }
     }
 
-    public static boolean modifyInformation(Map<String, String> lu, LdapContext ctx) {
+    public static boolean modifyInformation(String username, String password, LdapContext ctx) {
         try {
             ModificationItem[] mods = new ModificationItem[1];
-            String dn = "cn=" + lu.get("cn") + ",ou=People,dc=tcjf,dc=com";
+            String dn = "uid=" + username + "," + HTSC_USER_BASE_DN;
             /*添加属性*/
             //  Attribute attr0 = new BasicAttribute("description", "测试");
             //  mods[0] = new ModificationItem(DirContext.ADD_ATTRIBUTE,attr0);
 
             /*修改属性*/
-            Attribute attr0 = new BasicAttribute("userPassword", lu.get("userPassword"));
+            Attribute attr0 = new BasicAttribute("userPassword", password);
             mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, attr0);
 
             /*删除属性*/
@@ -223,8 +223,11 @@ public class LdapDemo {
 //        // add user: root
 //        addUser("xixi", "haha", context);
 
+        // modify
+        modifyInformation("xixi", "haha", context);
+
         // authorization
-        authorization("xixi", "4e4d6c332b6fe62a63afe56171fd3725", context);
+//        authorization("xixi", "4e4d6c332b6fe62a63afe56171fd3725", context);
 
         System.out.println("1");
 
