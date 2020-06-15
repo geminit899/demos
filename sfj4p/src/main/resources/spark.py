@@ -42,22 +42,25 @@ def worker(sock):
     infile = os.fdopen(os.dup(sock.fileno()), "rb", 65536)
     outfile = os.fdopen(os.dup(sock.fileno()), "wb", 65536)
 
-    # the path of this files
-    local_unzip_path = utf8_deserializer.loads(infile)
+    try:
+        # the path of this files
+        local_unzip_path = utf8_deserializer.loads(infile)
 
-    # add the unzip files path to sys path
-    sys.path.append(local_unzip_path)
-    from pythonCompute import compute as func
+        # add the unzip files path to sys path
+        sys.path.append(local_unzip_path)
+        from pythonCompute import compute as func
 
-    input_rdd = []
-    while True:
-        len = read_int(infile)
-        if len == SpecialLengths.END_OF_DATA_SECTION:
-            break
-        input_rdd.extend(pickle.loads(infile.read(len), encoding="bytes"))
+        input_rdd = []
+        while True:
+            len = read_int(infile)
+            if len == SpecialLengths.END_OF_DATA_SECTION:
+                break
+            input_rdd.extend(pickle.loads(infile.read(len), encoding="bytes"))
 
-    datas = func(input_rdd)
-    write_iterator(datas, outfile)
+        datas = func(input_rdd)
+        write_iterator(datas, outfile)
+    except Exception:
+        pass
 
     return 0
 

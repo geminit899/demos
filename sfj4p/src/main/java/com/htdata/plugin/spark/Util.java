@@ -70,7 +70,7 @@ public class Util {
                     FSDataInputStream inputStream = hdfs.open(new Path(filePath));
                     zis = new ZipInputStream(inputStream);
                 } catch (Exception e) {
-                   throw new IOException("从hdfs下载python的zip文件出错！", e);
+                    throw new IOException("从hdfs下载python的zip文件出错！", e);
                 }
             }
         } else {

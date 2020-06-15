@@ -39,70 +39,83 @@ public class PythonCompute implements Serializable {
      * @return
      */
     public JavaPairRDD<StructType, Row> compute(String fileUri, Dataset<Row> input) throws IOException {
-        File localizeDir = new File(new File(System.getProperty("user.dir"), "python-unzip"),
+        File data = new File(System.getProperty("user.dir"), "data");
+        File annotation = new File(data, "Annotation");
+        File annotationTrain = new File(annotation, "Annotation-Train");
+        File localizeDir = new File(new File(annotationTrain, "python-unzip"),
                 UUID.randomUUID().toString() + " - " + System.currentTimeMillis());
         return input.toJavaRDD().mapPartitionsToPair(
-            new PairFlatMapFunction<Iterator<Row>, StructType, Row>() {
-                @Override
-                public Iterator<Tuple2<StructType, Row>> call(Iterator<Row> inputRDDIterator) throws Exception {
-                    PythonFactory pythonFactory = new PythonFactory();
-                    Socket worker = pythonFactory.create();
-                    Iterator<byte[]> iterator = EvaluatePython.javaToPython(inputRDDIterator);
+                new PairFlatMapFunction<Iterator<Row>, StructType, Row>() {
+                    @Override
+                    public Iterator<Tuple2<StructType, Row>> call(Iterator<Row> inputRDDIterator) throws Exception {
+                        List<Tuple2<StructType, Row>> rows = new ArrayList<>();
 
-                    WriteThread writeThread = new WriteThread(fileUri, localizeDir.getPath(), worker, iterator);
-                    writeThread.start();
+                        PythonFactory pythonFactory = null;
+                        Socket worker = null;
+                        try {
+                            pythonFactory = new PythonFactory();
+                            worker = pythonFactory.create();
+                            Iterator<byte[]> iterator = EvaluatePython.javaToPython(inputRDDIterator);
 
-                    RootAllocator allocator = new RootAllocator(Long.MAX_VALUE);
-                    ArrowStreamReader reader = new ArrowStreamReader(worker.getInputStream(), allocator);
-                    VectorSchemaRoot root = reader.getVectorSchemaRoot();
-                    List<FieldVector> vectors = root.getFieldVectors();
+                            WriteThread writeThread = new WriteThread(fileUri, localizeDir.getPath(), worker, iterator);
+                            writeThread.start();
 
-                    List<Tuple2<StructType, Row>> rows = new ArrayList<>();
-                    List<StructField> structFields = new ArrayList<>();
-                    StructType outputStructType = null;
-                    // 第一次获取
-                    if (reader.loadNextBatch()) {
-                        Object[] valueObjects = new Object[vectors.size()];
-                        for (int i = 0; i < vectors.size(); i++) {
-                            String name = vectors.get(i).getField().getName();
-                            if (name.equals("__index_level_0__")) {
-                                continue;
+                            RootAllocator allocator = new RootAllocator(Long.MAX_VALUE);
+                            ArrowStreamReader reader = new ArrowStreamReader(worker.getInputStream(), allocator);
+                            VectorSchemaRoot root = reader.getVectorSchemaRoot();
+                            List<FieldVector> vectors = root.getFieldVectors();
+
+                            List<StructField> structFields = new ArrayList<>();
+                            StructType outputStructType = null;
+                            // 第一次获取
+                            if (reader.loadNextBatch()) {
+                                Object[] valueObjects = new Object[vectors.size()];
+                                for (int i = 0; i < vectors.size(); i++) {
+                                    String name = vectors.get(i).getField().getName();
+                                    if (name.equals("__index_level_0__")) {
+                                        continue;
+                                    }
+                                    DataType type = Util.fromArrowType(vectors.get(i).getField().getType());
+                                    structFields.add(DataTypes.createStructField(name, type, true));
+                                    valueObjects[i] = vectors.get(i).getObject(0);
+                                    if (valueObjects[i] instanceof Text) {
+                                        valueObjects[i] = valueObjects[i].toString();
+                                    }
+                                }
+                                outputStructType = DataTypes.createStructType(structFields);
+                                rows.add(new Tuple2<>(outputStructType, RowFactory.create(valueObjects)));
                             }
-                            DataType type = Util.fromArrowType(vectors.get(i).getField().getType());
-                            structFields.add(DataTypes.createStructField(name, type, true));
-                            valueObjects[i] = vectors.get(i).getObject(0);
-                            if (valueObjects[i] instanceof Text) {
-                                valueObjects[i] = valueObjects[i].toString();
+                            try {
+                                while (reader.loadNextBatch()) {
+                                    Object[] valueObjects = new Object[vectors.size()];
+                                    for (int i = 0; i < vectors.size(); i++) {
+                                        if (vectors.get(i).getField().getName().equals("__index_level_0__")) {
+                                            continue;
+                                        }
+                                        valueObjects[i] = vectors.get(i).getObject(0);
+                                        if (valueObjects[i] instanceof Text) {
+                                            valueObjects[i] = valueObjects[i].toString();
+                                        }
+                                    }
+                                    rows.add(new Tuple2<>(outputStructType, RowFactory.create(valueObjects)));
+                                }
+                            } catch (Exception e) {}
+
+                        } catch (Exception e) {
+                            throw e;
+                        } finally {
+                            //关闭socket的输出流
+                            if (worker != null && !worker.isClosed()) {
+                                worker.close();
                             }
+                            if (pythonFactory != null) {
+                                pythonFactory.stop();
+                            }
+                            Util.deleteDir(localizeDir.getPath());
                         }
-                        outputStructType = DataTypes.createStructType(structFields);
-                        rows.add(new Tuple2<>(outputStructType, RowFactory.create(valueObjects)));
+                        return rows.iterator();
                     }
-                    try {
-                        while (reader.loadNextBatch()) {
-                            int size = vectors.size();
-                            Object[] valueObjects = new Object[size];
-                            for (int i = 0; i < vectors.size(); i++) {
-                                if (vectors.get(i).getField().getName().equals("__index_level_0__")) {
-                                    continue;
-                                }
-                                valueObjects[i] = vectors.get(i).getObject(0);
-                                if (valueObjects[i] instanceof Text) {
-                                    valueObjects[i] = valueObjects[i].toString();
-                                }
-                            }
-                            rows.add(new Tuple2<>(outputStructType, RowFactory.create(valueObjects)));
-                        }
-                    } catch (Exception e) {}
-
-                    //关闭socket的输出流
-                    worker.shutdownOutput();
-                    pythonFactory.stop();
-                    Util.deleteDir(localizeDir.getPath());
-
-                    return rows.iterator();
                 }
-            }
         );
     }
 }

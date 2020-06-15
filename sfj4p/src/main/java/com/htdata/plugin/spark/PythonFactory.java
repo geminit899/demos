@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public class PythonFactory {
 
-    private String pythonExec = "python";
+    private String pythonExec = "python3";
     private String daemonPath;
 
     private Process daemon = null;
