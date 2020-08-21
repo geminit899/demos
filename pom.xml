@@ -23,6 +23,9 @@
         <module>htdata</module>
         <module>twill</module>
         <module>ldap</module>
+        <module>grakn</module>
+        <module>algorithm</module>
+        <module>neo4j</module>
     </modules>
 
     <properties>
