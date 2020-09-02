@@ -6,7 +6,6 @@ import org.apache.arrow.vector.VectorSchemaRoot;
 import org.apache.arrow.vector.ipc.ArrowStreamReader;
 import org.apache.arrow.vector.util.Text;
 import org.apache.spark.api.java.JavaPairRDD;
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -45,77 +44,77 @@ public class PythonCompute implements Serializable {
         File localizeDir = new File(new File(annotationTrain, "python-unzip"),
                 UUID.randomUUID().toString() + " - " + System.currentTimeMillis());
         return input.toJavaRDD().mapPartitionsToPair(
-                new PairFlatMapFunction<Iterator<Row>, StructType, Row>() {
-                    @Override
-                    public Iterator<Tuple2<StructType, Row>> call(Iterator<Row> inputRDDIterator) throws Exception {
-                        List<Tuple2<StructType, Row>> rows = new ArrayList<>();
+            new PairFlatMapFunction<Iterator<Row>, StructType, Row>() {
+                @Override
+                public Iterator<Tuple2<StructType, Row>> call(Iterator<Row> inputRDDIterator) throws Exception {
+                    List<Tuple2<StructType, Row>> rows = new ArrayList<>();
 
-                        PythonFactory pythonFactory = null;
-                        Socket worker = null;
+                    PythonFactory pythonFactory = null;
+                    Socket worker = null;
+                    try {
+                        pythonFactory = new PythonFactory();
+                        worker = pythonFactory.create();
+                        Iterator<byte[]> iterator = EvaluatePython.javaToPython(inputRDDIterator);
+
+                        WriteThread writeThread = new WriteThread(fileUri, localizeDir.getPath(), worker, iterator);
+                        writeThread.start();
+
+                        RootAllocator allocator = new RootAllocator(Long.MAX_VALUE);
+                        ArrowStreamReader reader = new ArrowStreamReader(worker.getInputStream(), allocator);
+                        VectorSchemaRoot root = reader.getVectorSchemaRoot();
+                        List<FieldVector> vectors = root.getFieldVectors();
+
+                        List<StructField> structFields = new ArrayList<>();
+                        StructType outputStructType = null;
+                        // 第一次获取
+                        if (reader.loadNextBatch()) {
+                            Object[] valueObjects = new Object[vectors.size()];
+                            for (int i = 0; i < vectors.size(); i++) {
+                                String name = vectors.get(i).getField().getName();
+                                if (name.equals("__index_level_0__")) {
+                                    continue;
+                                }
+                                DataType type = Util.fromArrowType(vectors.get(i).getField().getType());
+                                structFields.add(DataTypes.createStructField(name, type, true));
+                                valueObjects[i] = vectors.get(i).getObject(0);
+                                if (valueObjects[i] instanceof Text) {
+                                    valueObjects[i] = valueObjects[i].toString();
+                                }
+                            }
+                            outputStructType = DataTypes.createStructType(structFields);
+                            rows.add(new Tuple2<>(outputStructType, RowFactory.create(valueObjects)));
+                        }
                         try {
-                            pythonFactory = new PythonFactory();
-                            worker = pythonFactory.create();
-                            Iterator<byte[]> iterator = EvaluatePython.javaToPython(inputRDDIterator);
-
-                            WriteThread writeThread = new WriteThread(fileUri, localizeDir.getPath(), worker, iterator);
-                            writeThread.start();
-
-                            RootAllocator allocator = new RootAllocator(Long.MAX_VALUE);
-                            ArrowStreamReader reader = new ArrowStreamReader(worker.getInputStream(), allocator);
-                            VectorSchemaRoot root = reader.getVectorSchemaRoot();
-                            List<FieldVector> vectors = root.getFieldVectors();
-
-                            List<StructField> structFields = new ArrayList<>();
-                            StructType outputStructType = null;
-                            // 第一次获取
-                            if (reader.loadNextBatch()) {
+                            while (reader.loadNextBatch()) {
                                 Object[] valueObjects = new Object[vectors.size()];
                                 for (int i = 0; i < vectors.size(); i++) {
-                                    String name = vectors.get(i).getField().getName();
-                                    if (name.equals("__index_level_0__")) {
+                                    if (vectors.get(i).getField().getName().equals("__index_level_0__")) {
                                         continue;
                                     }
-                                    DataType type = Util.fromArrowType(vectors.get(i).getField().getType());
-                                    structFields.add(DataTypes.createStructField(name, type, true));
                                     valueObjects[i] = vectors.get(i).getObject(0);
                                     if (valueObjects[i] instanceof Text) {
                                         valueObjects[i] = valueObjects[i].toString();
                                     }
                                 }
-                                outputStructType = DataTypes.createStructType(structFields);
                                 rows.add(new Tuple2<>(outputStructType, RowFactory.create(valueObjects)));
                             }
-                            try {
-                                while (reader.loadNextBatch()) {
-                                    Object[] valueObjects = new Object[vectors.size()];
-                                    for (int i = 0; i < vectors.size(); i++) {
-                                        if (vectors.get(i).getField().getName().equals("__index_level_0__")) {
-                                            continue;
-                                        }
-                                        valueObjects[i] = vectors.get(i).getObject(0);
-                                        if (valueObjects[i] instanceof Text) {
-                                            valueObjects[i] = valueObjects[i].toString();
-                                        }
-                                    }
-                                    rows.add(new Tuple2<>(outputStructType, RowFactory.create(valueObjects)));
-                                }
-                            } catch (Exception e) {}
+                        } catch (Exception e) {}
 
-                        } catch (Exception e) {
-                            throw e;
-                        } finally {
-                            //关闭socket的输出流
-                            if (worker != null && !worker.isClosed()) {
-                                worker.close();
-                            }
-                            if (pythonFactory != null) {
-                                pythonFactory.stop();
-                            }
-                            Util.deleteDir(localizeDir.getPath());
+                    } catch (Exception e) {
+                        throw e;
+                    } finally {
+                        //关闭socket的输出流
+                        if (worker != null && !worker.isClosed()) {
+                            worker.close();
                         }
-                        return rows.iterator();
+                        if (pythonFactory != null) {
+                            pythonFactory.stop();
+                        }
+                        Util.deleteDir(localizeDir.getPath());
                     }
+                    return rows.iterator();
                 }
+            }
         );
     }
 }

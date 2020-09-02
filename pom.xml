@@ -23,6 +23,7 @@
         <module>htdata</module>
         <module>twill</module>
         <module>ldap</module>
+        <module>ml</module>
     </modules>
 
     <properties>

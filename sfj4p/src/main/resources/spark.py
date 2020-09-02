@@ -33,7 +33,9 @@ def write_iterator(iterator, of):
             if writer is None:
                 writer = pa.RecordBatchStreamWriter(of, batch.schema)
             writer.write_batch(batch)
+            of.flush()
         write_int(SpecialLengths.END_OF_STREAM, of)
+        of.flush()
     finally:
         if writer is not None:
             writer.close()
@@ -42,25 +44,22 @@ def worker(sock):
     infile = os.fdopen(os.dup(sock.fileno()), "rb", 65536)
     outfile = os.fdopen(os.dup(sock.fileno()), "wb", 65536)
 
-    try:
-        # the path of this files
-        local_unzip_path = utf8_deserializer.loads(infile)
+    # the path of this files
+    local_unzip_path = utf8_deserializer.loads(infile)
 
-        # add the unzip files path to sys path
-        sys.path.append(local_unzip_path)
-        from pythonCompute import compute as func
+    # add the unzip files path to sys path
+    sys.path.append(local_unzip_path)
+    from pythonCompute import compute as func
 
-        input_rdd = []
-        while True:
-            len = read_int(infile)
-            if len == SpecialLengths.END_OF_DATA_SECTION:
-                break
-            input_rdd.extend(pickle.loads(infile.read(len), encoding="bytes"))
+    input_rdd = []
+    while True:
+        len = read_int(infile)
+        if len == SpecialLengths.END_OF_DATA_SECTION:
+            break
+        input_rdd.extend(pickle.loads(infile.read(len), encoding="bytes"))
 
-        datas = func(input_rdd)
-        write_iterator(datas, outfile)
-    except Exception:
-        pass
+    datas = func(input_rdd)
+    write_iterator(datas, outfile)
 
     return 0
 

@@ -59,7 +59,7 @@ public class SparkTest {
         }
 
         PythonCompute pythonCompute = new PythonCompute();
-        String path = "file:/home/geminit/work/python.zip";
+        String path = "file:/Users/geminit/PycharmProjects/PythonDemo/spark/pyspark.zip";
         JavaPairRDD<StructType, Row> resultPair = pythonCompute.compute(path, inputDataset);
 
         JavaRDD<String> result = resultPair.map(new Function<Tuple2<StructType, Row>, String>() {

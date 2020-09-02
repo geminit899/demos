@@ -1,6 +1,18 @@
 package com.geminit;
 
 import com.sun.jndi.toolkit.dir.SearchFilter;
+import org.ldaptive.BindConnectionInitializer;
+import org.ldaptive.Connection;
+import org.ldaptive.ConnectionConfig;
+import org.ldaptive.Credential;
+import org.ldaptive.DefaultConnectionFactory;
+import org.ldaptive.LdapEntry;
+import org.ldaptive.SearchExecutor;
+import org.ldaptive.auth.AuthenticationRequest;
+import org.ldaptive.auth.AuthenticationResponse;
+import org.ldaptive.auth.Authenticator;
+import org.ldaptive.auth.BindAuthenticationHandler;
+import org.ldaptive.auth.SearchDnResolver;
 
 import javax.naming.Binding;
 import javax.naming.Context;
@@ -10,6 +22,7 @@ import javax.naming.directory.Attribute;
 import javax.naming.directory.BasicAttribute;
 import javax.naming.directory.BasicAttributes;
 import javax.naming.directory.DirContext;
+import javax.naming.directory.InitialDirContext;
 import javax.naming.directory.ModificationItem;
 import javax.naming.directory.SearchControls;
 import javax.naming.directory.SearchResult;
@@ -18,16 +31,17 @@ import javax.naming.ldap.LdapContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 public class LdapDemo {
-    private static final String HOST = "192.168.0.114";
+    private static final String HOST = "192.168.1.164";
     private static final String PORT = "389";
-    private static final String HTSC_BASE_DN = "ou=htsc,dc=mycompany,dc=com";
-    private static final String HTSC_USER_BASE_DN = "ou=sysuser,ou=htsc,dc=mycompany,dc=com";
-    private static final String ROOT = "cn=admin,dc=mycompany,dc=com";
-    private static final String PWD = "admin";
+    private static final String HTSC_BASE_DN = "ou=htsc,dc=geminit,dc=com";
+    private static final String HTSC_USER_BASE_DN = "ou=user,ou=htsc,dc=geminit,dc=com";
+    private static final String ROOT = "cn=admin,dc=geminit,dc=com";
+    private static final String PWD = "hack";
 
     private static LdapContext getDirContext() throws NamingException {
         Hashtable<String, String> tbl = new Hashtable<>();
@@ -205,8 +219,51 @@ public class LdapDemo {
         return lm;
     }
 
+    private static boolean login() throws Exception {
+        // init
+        ConnectionConfig config = new ConnectionConfig("ldap://192.168.1.164:389");
+        config.setConnectionInitializer(new BindConnectionInitializer("cn=admin,dc=geminit,dc=com", new Credential("hack")));
+        DefaultConnectionFactory factory = new DefaultConnectionFactory(config);
+
+        // check user exist
+        SearchExecutor executor = new SearchExecutor();
+        executor.setBaseDn("ou=jupyter,dc=geminit,dc=com");
+        org.ldaptive.SearchResult result = executor.search(factory, "(&(cn=*)(objectClass=organizationalRole))").getResult();
+        Iterator iterator = result.getEntries().iterator();
+        while (iterator.hasNext()) {
+            LdapEntry group = (LdapEntry)iterator.next();
+            String gName = group.getAttribute("cn").getStringValue();
+            if (group.getAttribute("memberUid") != null) {
+                Iterator it = group.getAttribute("memberUid").getStringValues().iterator();
+                while (it.hasNext()) {
+                    String name = it.next().toString();
+                    System.out.print(1);
+                }
+            }
+        }
+
+        SearchDnResolver dnResolver = new SearchDnResolver(factory);
+        dnResolver.setBaseDn("ou=jupyter,dc=geminit,dc=com");
+        dnResolver.setUserFilter("(uid={user})");
+        BindAuthenticationHandler authHandler = new BindAuthenticationHandler(factory);
+        Authenticator auth = new Authenticator(dnResolver, authHandler);
+        AuthenticationResponse response = auth.authenticate(new AuthenticationRequest("root", new Credential("hack")));
+        System.out.println(response.getResult());
+
+//        Hashtable<String, String> tbl = new Hashtable<>();
+//        tbl.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+//        tbl.put(Context.PROVIDER_URL, "ldap://192.168.1.164:389");
+//        tbl.put(Context.SECURITY_AUTHENTICATION, "simple");
+//        tbl.put(Context.SECURITY_PRINCIPAL, "cn=admin,ou=jupyter,dc=geminit,dc=com");
+//        tbl.put(Context.SECURITY_CREDENTIALS, "admin");
+//        InitialLdapContext ctx = new InitialLdapContext(tbl, null);
+
+        return true;
+    }
+
     public static void main(String[] args) throws Exception {
-        LdapContext context = getDirContext();
+//        LdapContext context = getDirContext();
+        login();
 
 //        // add ou=htsc
 //        Map<String, String> group = new HashMap<>();
@@ -220,11 +277,11 @@ public class LdapDemo {
 //        group.put("cn", "admin");
 //        addGoups(group, context);
 
-//        // add user: root
-//        addUser("xixi", "haha", context);
+        // add user: root
+//        addUser("root", "hack", context);
 
         // modify
-        modifyInformation("xixi", "haha", context);
+//        modifyInformation("xixi", "haha", context);
 
         // authorization
 //        authorization("xixi", "4e4d6c332b6fe62a63afe56171fd3725", context);
