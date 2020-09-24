@@ -24,13 +24,14 @@
         <module>twill</module>
         <module>ldap</module>
         <module>ml</module>
+        <module>kafka_0.10.1.0</module>
     </modules>
 
     <properties>
-        <flink.version>1.7.1</flink.version>
+        <flink.version>1.7.2</flink.version>
         <spark.version>2.1.0</spark.version>
         <hbase.version>2.0.0</hbase.version>
-        <hadoop.version>3.1.1</hadoop.version>
+        <hadoop.version>2.3.0</hadoop.version>
         <twill.version>0.11.0</twill.version>
     </properties>
 
