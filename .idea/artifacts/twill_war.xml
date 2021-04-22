@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="twill:war">
+    <output-path>$PROJECT_DIR$/twill/target</output-path>
+    <properties id="maven-jee-properties">
+      <options>
+        <module>twill</module>
+        <packaging>war</packaging>
+      </options>
+    </properties>
+    <root id="archive" name="twill-1.0.war">
+      <element id="artifact" artifact-name="twill:war exploded" />
+    </root>
+  </artifact>
+</component>

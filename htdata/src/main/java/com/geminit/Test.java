@@ -12,6 +12,7 @@ import java.io.*;
 
 public class Test {
     public static void main(String[] args) {
+        String s = String.valueOf(null);
         String url = "http://192.168.2.211:11015/v3/namespaces/default/apps/ttt";
         String res = httpClient("DELETE", url, "{\"name\": \"tyx\", \"age\": 23}");
         System.out.println(res);

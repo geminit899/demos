@@ -9,8 +9,8 @@ import java.util.Arrays;
 import java.util.Properties;
 
 public class Kafka_Consumer {
-    private static String SERVER = "192.168.0.114:6667";
-    private static String TOPIC = "FlinkBatchOutput";
+    private static String SERVER = "192.168.0.114:9092";
+    private static String TOPIC = "ttt";
 
     public static void main(String [] args){
         //这个是用来配置kafka的参数
@@ -18,7 +18,7 @@ public class Kafka_Consumer {
         //这里不是配置zookeeper了，这个是配置bootstrap.servers
         props.put("bootstrap.servers", SERVER);
         //这个配置组，之前我记得好像不配置可以，现在如果不配置那么不能运行
-        props.put("group.id", "test");
+        props.put("group.id", "hhhh");
         props.put("auto.offset.reset", "earliest");
         //序列化
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");

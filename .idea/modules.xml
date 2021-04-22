@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/Demos.iml" filepath="$PROJECT_DIR$/Demos.iml" />
+      <module fileurl="file://$PROJECT_DIR$/elasticsearch/elasticsearch.iml" filepath="$PROJECT_DIR$/elasticsearch/elasticsearch.iml" />
+      <module fileurl="file://$PROJECT_DIR$/flink/flink.iml" filepath="$PROJECT_DIR$/flink/flink.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hadoop/hadoop.iml" filepath="$PROJECT_DIR$/hadoop/hadoop.iml" />
+      <module fileurl="file://$PROJECT_DIR$/hbase/hbase.iml" filepath="$PROJECT_DIR$/hbase/hbase.iml" />
+      <module fileurl="file://$PROJECT_DIR$/htdata/htdata.iml" filepath="$PROJECT_DIR$/htdata/htdata.iml" />
+      <module fileurl="file://$PROJECT_DIR$/jdbc/jdbc.iml" filepath="$PROJECT_DIR$/jdbc/jdbc.iml" />
+      <module fileurl="file://$PROJECT_DIR$/kafka_0.10.1.0/kafka_0.10.1.0.iml" filepath="$PROJECT_DIR$/kafka_0.10.1.0/kafka_0.10.1.0.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ldap/ldap.iml" filepath="$PROJECT_DIR$/ldap/ldap.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ml/ml.iml" filepath="$PROJECT_DIR$/ml/ml.iml" />
+      <module fileurl="file://$PROJECT_DIR$/py4j/py4j.iml" filepath="$PROJECT_DIR$/py4j/py4j.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sfj4p/sfj4p.iml" filepath="$PROJECT_DIR$/sfj4p/sfj4p.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spark/spark.iml" filepath="$PROJECT_DIR$/spark/spark.iml" />
+      <module fileurl="file://$PROJECT_DIR$/twill/twill.iml" filepath="$PROJECT_DIR$/twill/twill.iml" />
+    </modules>
+  </component>
+</project>

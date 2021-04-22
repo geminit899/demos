@@ -6,14 +6,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 public class CollectUtils {
-    public static String HTSC_VERSION = "3.1";
+    public static String HTSC_VERSION = "4.0";
     public static String CDAP_VERSION = "6.2.0";
     public static String HYDRATOR_VERSION = "2.4.0";
 
-    public static String HTSC_PATH = "/Users/geminit/svn/HTSC-" + HTSC_VERSION;
+    public static String HTSC_PATH = "/home/geminit/work/svn/HTSC/trunk/HTSC-" + HTSC_VERSION;
     public static String HYDRATOR_PATH = HTSC_PATH + "/hydrator" + HYDRATOR_VERSION;
     public static String ARTIFACTS_PATH = HTSC_PATH + "/artifacts";
-    public static String RPMS_PATH = HTSC_PATH + "/rpms";
+    public static String RPMS_PATH = HTSC_PATH + "/htsc";
 
 
     public static boolean isDept(File file) {

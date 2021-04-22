@@ -13,11 +13,16 @@ import java.util.Properties;
 public class Kafka_Producer {
     private static Map<String, List<String>> messages = new HashMap<>();
     private static String SERVER = "192.168.0.114:6667";
-    private static String TOPIC = "FlinkBatchOutput";
+    private static String TOPIC = "ttt";
     static {
-        List<String> htst = new ArrayList<>();
-        htst.add("test");
-        messages.put("htst", htst);
+        List<String> ttt = new ArrayList<>();
+        ttt.add("1,1,1");
+        ttt.add("1,1,1");
+        ttt.add("1,1,1");
+        ttt.add("2,2,2");
+        ttt.add("2,2,2");
+        ttt.add("2,2,2");
+        messages.put("ttt", ttt);
 
         List<String> sparkIn = new ArrayList<>();
         sparkIn.add("这，是test1.");
@@ -76,15 +81,17 @@ public class Kafka_Producer {
     }
 
     public static void main(String[] args) {
-        //这个是用来配置kafka的参数
-        Properties prop = new Properties();
-        //这里不是配置broker.id了，这个是配置bootstrap.servers
-        prop.put("bootstrap.servers", SERVER);
-        //下面是分别配置 key和value的序列化
-        prop.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        prop.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
-        //这个地方和1.0X之前的版本有不一样的，这个是使用kafkaproducer 类来实例化
-        Producer<String, String> producer = new KafkaProducer<String, String>(prop);
+        Properties props = new Properties();
+        props.put("bootstrap.servers", SERVER);
+        props.put("acks", "all");
+        props.put("retries", 0);
+        props.put("batch.size", 16384);
+        props.put("linger.ms", 1);
+        props.put("buffer.memory", 33554432);
+        props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+
+        Producer<String, String> producer = new KafkaProducer<String, String>(props);
 
         List<String> messageList = messages.get(TOPIC);
         for (int i = 0; i < messageList.size(); i++) {
@@ -93,6 +100,6 @@ public class Kafka_Producer {
             producer.send(new ProducerRecord<String, String>(TOPIC, Integer.toString(i), message));
             System.out.printf("Send key: %s  value: %s.\n", i, message);
         }
-//        producer.close();
+        producer.close();
     }
 }

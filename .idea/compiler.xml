@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="kafka_0.10.1.0" />
+        <module name="elasticsearch" />
+        <module name="flink" />
+        <module name="hadoop" />
+        <module name="sfj4p" />
+        <module name="py4j" />
+        <module name="jdbc" />
+        <module name="ml" />
+        <module name="hbase" />
+        <module name="kafka" />
+        <module name="ldap" />
+        <module name="htdata" />
+        <module name="spark" />
+        <module name="twill" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="Demos" target="1.8" />
+      <module name="elasticsearch" target="1.8" />
+      <module name="flink" target="1.8" />
+      <module name="hadoop" target="1.5" />
+      <module name="hbase" target="1.8" />
+      <module name="htdata" target="1.8" />
+      <module name="jdbc" target="1.8" />
+      <module name="kafka" target="1.8" />
+      <module name="kafka_0.10.1.0" target="1.8" />
+      <module name="ldap" target="1.8" />
+      <module name="ml" target="1.8" />
+      <module name="py4j" target="1.8" />
+      <module name="sfj4p" target="1.8" />
+      <module name="spark" target="1.8" />
+      <module name="twill" target="1.8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>
