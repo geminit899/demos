@@ -23,6 +23,11 @@ public class BatchTest {
         list.add(new Tuple2<>(new Obj("Imsi"), new Obj("220")));
         DataSet<Tuple2<Object, Object>> sinkDataSet = EEBasic.EE.fromCollection(list);
 
+        List<Tuple2<Object, Object>> list0 = new ArrayList<>();
+        list0.add(new Tuple2<>(5, 1110));
+        list0.add(new Tuple2<>(2, 220));
+        DataSet<Tuple2<Object, Object>> sinkDataSet0 = EEBasic.EE.fromCollection(list0);
+
         DataSet<Tuple2<String, Integer>> test = sinkDataSet.groupBy(new KeySelector<Tuple2<Object,Object>, String>() {
             @Override
             public String getKey(Tuple2<Object, Object> tuple2) {
