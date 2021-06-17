@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Dm8JdbcDriver18-8.1.1.49">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Work/HTSC/Dm8JdbcDriver18-8.1.1.49.jar!/" />
+      <root url="jar://$USER_HOME$/Work/HTSC/mysql-connector-java-5.1.47.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

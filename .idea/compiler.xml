@@ -7,19 +7,19 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="kafka_0.10.1.0" />
-        <module name="elasticsearch" />
-        <module name="flink" />
-        <module name="hadoop" />
-        <module name="sfj4p" />
-        <module name="py4j" />
         <module name="jdbc" />
-        <module name="ml" />
-        <module name="hbase" />
-        <module name="kafka" />
+        <module name="py4j" />
+        <module name="flink" />
+        <module name="elasticsearch" />
         <module name="ldap" />
-        <module name="htdata" />
         <module name="spark" />
+        <module name="kafka" />
+        <module name="sfj4p" />
+        <module name="hadoop" />
         <module name="twill" />
+        <module name="hbase" />
+        <module name="ml" />
+        <module name="htdata" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
